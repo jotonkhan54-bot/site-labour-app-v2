@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Site Labour & Salary Manager (Online & Offline)</title>
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --primary-light: #2563eb;
+    --accent: #f59e0b;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --orange: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--text); padding-bottom: 84px; }
+
+  /* Header */
+  .topbar {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+    color: #fff;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .topbar-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .app-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .app-sub { font-size: 11px; opacity: 0.88; margin-top: 2px; }
+
+  /* Online/Offline Pill */
+  .net-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+  .net-online { background: #16a34a; color: #fff; }
+  .net-offline { background: #475569; color: #f8fafc; }
+  .net-pending { background: #d97706; color: #fff; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+
+  /* Site Selector Bar */
+  .site-bar {
+    background: #172554;
+    padding: 9px 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .site-bar select {
+    flex: 1;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    background: #fff;
+    color: var(--text);
+  }
+  .btn-add-site {
+    background: var(--accent);
+    color: #111827;
+    border: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .container { padding: 14px; max-width: 680px; margin: 0 auto; }
+
+  /* Always-Visible Dashboard Summary */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .stat-val { font-size: 21px; font-weight: 800; margin-top: 4px; }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .c-green { color: var(--green); }
+  .c-red { color: var(--red); }
+  .c-blue { color: var(--primary-light); }
+  .c-orange { color: var(--orange); }
+
+  /* Cards & Forms */
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+  .form-row { margin-bottom: 10px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--primary-light); }
+
+  .btn {
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--primary-light); color: #fff; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-orange { background: var(--accent); color: #111827; }
+  .btn-outline { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 7px; width: auto; }
+
+  /* Worker Attendance & OT Row */
+  .worker-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px;
+    margin-bottom: 10px;
+    background: #fafafa;
+  }
+  .worker-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .worker-name { font-weight: 700; font-size: 15px; }
+  .worker-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+
+  .att-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px dashed #cbd5e1;
+    flex-wrap: wrap;
+  }
+  .toggle-group { display: flex; gap: 6px; }
+  .att-btn {
+    padding: 7px 13px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .att-btn.active-p { background: var(--green); color: #fff; border-color: var(--green); }
+  .att-btn.active-a { background: var(--red); color: #fff; border-color: var(--red); }
+
+  .ot-box { display: flex; align-items: center; gap: 6px; }
+  .ot-box span { font-size: 12px; font-weight: 700; color: var(--orange); }
+  .ot-input { width: 68px; padding: 6px 8px; text-align: center; font-weight: 700; }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    z-index: 60;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+  }
+  .nav-item {
+    border: none;
+    background: none;
+    padding: 8px 2px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+  }
+  .nav-item.active { color: var(--primary-light); font-weight: 800; }
+  .nav-icon { font-size: 17px; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { border: 1px solid var(--border); padding: 7px 6px; text-align: left; white-space: nowrap; }
+  th { background: #f8fafc; font-weight: 700; color: var(--text); }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  /* Payslip Card Preview */
+  .payslip-sheet {
+    border: 2px solid #1e3a8a;
+    border-radius: 10px;
+    padding: 14px;
+    background: #fff;
+  }
+  .ps-header { text-align: center; border-bottom: 1.5px solid #1e3a8a; padding-bottom: 8px; margin-bottom: 10px; }
+  .ps-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+  .ps-total { display: flex; justify-content: space-between; padding: 9px 0; font-size: 16px; font-weight: 800; color: var(--primary); border-top: 2px solid #1e3a8a; margin-top: 6px; }
+
+  .info-banner {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+    margin-bottom: 10px;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="app-title">
+          🏗️ Site Labour
+          <span id="netStatusPill" class="net-pill net-offline" onclick="switchTab('sync', document.getElementById('nav-sync'))">
+            <span class="dot"></span><span id="netStatusText">Offline Ready</span>
+          </span>
+        </div>
+        <div class="app-sub" id="headerSiteInfo">Project Attendance, Overtime &amp; Payroll</div>
+      </div>
+      <div style="text-align:right;">
+        <input type="month" id="globalMonth" style="padding:5px 7px; font-size:12px; font-weight:700; border-radius:7px; border:none;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Switcher -->
+  <div class="site-bar">
+    <select id="siteSelector"></select>
+    <button class="btn-add-site" onclick="openSiteModal()">+ New Site</button>
+  </div>
+
+  <div class="container">
+
+    <!-- ALWAYS-VISIBLE DASHBOARD KPI SUMMARY -->
+    <div class="dash-grid">
+      <div class="stat-card">
+        <div class="stat-label">Today Present</div>
+        <div class="stat-val c-green" id="kpiPresent">0</div>
+        <div class="stat-sub" id="kpiDateLabel">Date: Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Today Absent</div>
+        <div class="stat-val c-red" id="kpiAbsent">0</div>
+        <div class="stat-sub" id="kpiTotalWorkers">Site Workers: 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Site Month Salary</div>
+        <div class="stat-val c-blue" id="kpiSiteSalary">0</div>
+        <div class="stat-sub" id="kpiSiteSalarySub">Includes OT Pay</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">All Sites Salary</div>
+        <div class="stat-val c-orange" id="kpiAllSitesSalary">0</div>
+        <div class="stat-sub" id="kpiAllSitesCount">Across 1 Site</div>
+      </div>
+    </div>
+
+    <!-- TAB 1: DAILY ATTENDANCE & SUPERVISOR OVERTIME -->
+    <div id="tab-attendance">
+      <div class="card">
+        <div class="card-title">
+          <span>📋 Daily Attendance &amp; OT</span>
+          <input type="date" id="attDate" style="width:auto; padding:6px 8px; font-size:13px; font-weight:700;" />
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-green btn-sm" onclick="markAllPresent()">✓ Mark All Present</button>
+          <button class="btn btn-outline btn-sm" onclick="openSiteSettingsModal()">⚙️ Site Salary Settings</button>
+        </div>
+        <div id="attendanceList"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: WORKER REGISTRATION & LIST -->
+    <div id="tab-workers" class="hidden">
+      <div class="card">
+        <div class="card-title">➕ Register Worker (<span id="regSiteName">Site</span>)</div>
+        <div class="form-grid-2">
+          <div>
+            <label>Worker ID *</label>
+            <input type="text" id="wId" placeholder="e.g. W-101" />
+          </div>
+          <div>
+            <label>Mobile Number *</label>
+            <input type="tel" id="wMobile" placeholder="e.g. 55123456" />
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Worker Full Name *</label>
+          <input type="text" id="wName" placeholder="e.g. Rahim Uddin" />
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label>Trade / Role</label>
+            <input type="text" id="wRole" placeholder="Mason / Helper / Steel" />
+          </div>
+          <div>
+            <label id="wRateLabel">Basic Salary (Site Default)</label>
+            <input type="number" id="wCustomRate" placeholder="Blank = site default" />
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Hourly Overtime Rate (Per OT Hour) *</label>
+          <input type="number" id="wOtRate" placeholder="e.g. 15" />
+        </div>
+        <button class="btn btn-primary" onclick="registerWorker()">Save Worker to This Site</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👷 Registered Workers (<span id="workerCountBadge">0</span>)</div>
+        <div id="workersList"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: MONTHLY SALARY & EXCEL EXPORT -->
+    <div id="tab-salary" class="hidden">
+      <div class="card">
+        <div class="card-title">💰 Monthly Salary Summary (<span id="salMonthLabel"></span>)</div>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+          Calculates basic pay based on site salary rule + hourly overtime rate × supervisor OT hours. Works 100% offline or online.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-green" onclick="exportSiteExcel()">📥 Site Excel (.xlsx)</button>
+          <button class="btn btn-orange" onclick="exportAllSitesExcel()">📊 All Sites Excel (.xlsx)</button>
+        </div>
+        <div class="table-wrap" id="salaryTableWrap"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: PROJECT-WISE MONTH-END ATTENDANCE SHEET -->
+    <div id="tab-sheet" class="hidden">
+      <div class="card">
+        <div class="card-title">📅 Project-Wise Attendance Sheet</div>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+          Full month day-by-day attendance matrix (P = Present, A = Absent, +OT hrs) for the selected project site.
+        </p>
+        <button class="btn btn-primary" style="margin-bottom:12px;" onclick="exportProjectAttendanceSheetExcel()">
+          📥 Download Project Attendance Excel (.xlsx)
+        </button>
+        <div class="table-wrap" id="matrixTableWrap"></div>
+      </div>
+    </div>
+
+    <!-- TAB 5: SINGLE PERSON PAYSLIPS -->
+    <div id="tab-payslip" class="hidden">
+      <div class="card">
+        <div class="card-title">🧾 Individual Worker Payslip</div>
+        <div class="form-row">
+          <label>Select Worker</label>
+          <select id="payslipWorkerSelect" onchange="renderSinglePayslip()"></select>
+        </div>
+        <div id="payslipContainer"></div>
+      </div>
+    </div>
+
+    <!-- TAB 6: ONLINE + OFFLINE SYNC & BACKUP -->
+    <div id="tab-sync" class="hidden">
+      <div class="card">
+        <div class="card-title">☁️ Online &amp; Offline Sync Engine</div>
+        <div class="info-banner">
+          <b>How Online + Offline Mode Works:</b><br/>
+          • <b>Offline Mode (No Internet on Site):</b> Every attendance mark, overtime entry, and worker registration saves instantly to your phone's local storage + IndexedDB vault.<br/>
+          • <b>Online Auto-Sync:</b> When internet returns, pending changes automatically sync to your Cloud Sync URL (if configured) so multiple supervisors or your office phone stay updated!
+        </div>
+
+        <div class="ps-row"><span>Connection Status:</span><b id="syncConnState">Checking...</b></div>
+        <div class="ps-row"><span>Local Storage + IndexedDB:</span><b style="color:#16a34a;">Active (Protected)</b></div>
+        <div class="ps-row"><span>Pending Offline Changes:</span><b id="syncPendingCount">0</b></div>
+        <div class="ps-row" style="margin-bottom:12px;"><span>Last Cloud Sync:</span><b id="syncLastTime">Never</b></div>
+
+        <div class="form-row">
+          <label>Optional Cloud Sync Endpoint URL (Firebase Realtime DB / REST JSON URL)</label>
+          <input type="url" id="cloudSyncUrl" placeholder="https://your-project.firebaseio.com/site_labour.json" />
+        </div>
+        <div class="form-row">
+          <label>Company / Team Sync Code (Isolates your company data)</label>
+          <input type="text" id="cloudSyncKey" placeholder="e.g. alrayyan-construction-2026" />
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+          <button class="btn btn-primary" onclick="saveCloudConfigAndSync()">☁️ Save &amp; Sync Now</button>
+          <button class="btn btn-outline" onclick="pullFromCloud()">⬇️ Pull Cloud Data</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📲 Offline Phone-to-Phone Backup (WhatsApp / File)</div>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+          Even with zero cloud setup, a supervisor can export a backup file offline and share it via WhatsApp/Bluetooth to merge with the main office phone.
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn btn-green" onclick="exportBackupJson()">📤 Export Backup</button>
+          <label class="btn btn-orange" style="margin:0; cursor:pointer;">
+            📥 Import / Merge
+            <input type="file" id="importBackupInput" accept=".json,application/json" style="display:none;" onchange="importBackupJson(event)" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('attendance', this)">
+      <span class="nav-icon">✅</span><span>Attend</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('workers', this)">
+      <span class="nav-icon">👷</span><span>Workers</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('salary', this)">
+      <span class="nav-icon">💰</span><span>Salary</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('sheet', this)">
+      <span class="nav-icon">📅</span><span>Sheet</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('payslip', this)">
+      <span class="nav-icon">🧾</span><span>Payslip</span>
+    </button>
+    <button class="nav-item" id="nav-sync" onclick="switchTab('sync', this)">
+      <span class="nav-icon">☁️</span><span>Sync</span>
+    </button>
+  </div>
+
+  <!-- MODAL: ADD / EDIT SITE -->
+  <div class="modal-backdrop" id="siteModal">
+    <div class="modal-box">
+      <div class="card-title">
+        <span id="siteModalTitle">Add New Project Site</span>
+        <button class="btn-sm" onclick="closeModal('siteModal')" style="border:none;background:#eee;">✕</button>
+      </div>
+      <div class="form-row">
+        <label>Project / Site Name *</label>
+        <input type="text" id="mSiteName" placeholder="e.g. Lusail Tower Site A" />
+      </div>
+      <div class="form-row">
+        <label>Site Location / Code</label>
+        <input type="text" id="mSiteLoc" placeholder="e.g. Zone 69, Block B" />
+      </div>
+      <div class="form-row">
+        <label>Currency Symbol</label>
+        <input type="text" id="mCurrency" value="QAR" placeholder="QAR / BDT / INR / USD" />
+      </div>
+      <div class="form-row">
+        <label>Salary Calculation Type for This Site *</label>
+        <select id="mSalaryType">
+          <option value="daily">Daily Wage (Present Days × Daily Rate)</option>
+          <option value="monthly30">Monthly Fixed (Monthly Salary ÷ 30 × Present Days)</option>
+          <option value="monthlyDays">Monthly Fixed (Monthly Salary ÷ Month Days × Present Days)</option>
+        </select>
+      </div>
+      <div class="form-grid-2">
+        <div>
+          <label>Default Site Basic Rate *</label>
+          <input type="number" id="mDefaultRate" placeholder="e.g. 100 or 2500" />
+        </div>
+        <div>
+          <label>Default Hourly OT Rate *</label>
+          <input type="number" id="mDefaultOtRate" placeholder="e.g. 15" />
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSite()">Save Project Site</button>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT WORKER -->
+  <div class="modal-backdrop" id="editWorkerModal">
+    <div class="modal-box">
+      <div class="card-title">
+        <span>Edit Worker Details &amp; Rates</span>
+        <button class="btn-sm" onclick="closeModal('editWorkerModal')" style="border:none;background:#eee;">✕</button>
+      </div>
+      <input type="hidden" id="ewInternalId" />
+      <div class="form-grid-2">
+        <div>
+          <label>Worker ID</label>
+          <input type="text" id="ewId" />
+        </div>
+        <div>
+          <label>Mobile Number</label>
+          <input type="tel" id="ewMobile" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Worker Name</label>
+        <input type="text" id="ewName" />
+      </div>
+      <div class="form-row">
+        <label>Role / Trade</label>
+        <input type="text" id="ewRole" />
+      </div>
+      <div class="form-grid-2">
+        <div>
+          <label>Basic Rate (Daily/Monthly)</label>
+          <input type="number" id="ewRate" />
+        </div>
+        <div>
+          <label>Hourly Overtime Rate</label>
+          <input type="number" id="ewOtRate" />
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="updateWorker()">Update Worker</button>
+    </div>
+  </div>
+
+<script>
+// ============================================================
+// DUAL OFFLINE + ONLINE STORAGE & SYNC ENGINE
+// ============================================================
+const STORAGE_KEY = 'site_labour_payroll_v2';
+const SYNC_CFG_KEY = 'site_labour_sync_cfg_v1';
+
+let state = {
+  sites: [],
+  activeSiteId: null,
+  workers: [], // { uid, siteId, workerId, name, mobile, role, basicRate, otRate, updatedAt }
+  attendance: {}, // key: `${siteId}|${date}|${uid}` -> { status: 'P'|'A', otHours: number, updatedAt }
+  pendingSyncCount: 0
+};
+
+let syncConfig = {
+  cloudUrl: '',
+  teamKey: 'default-team',
+  lastSynced: 'Never'
+};
+
+let editingSiteId = null;
+
+// IndexedDB mirror for bulletproof offline persistence
+function mirrorToIndexedDB(dataObj) {
+  try {
+    const req = indexedDB.open('SiteLabourOfflineDB', 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('vault')) {
+        db.createObjectStore('vault');
+      }
+    };
+    req.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction('vault', 'readwrite');
+      tx.objectStore('vault').put(JSON.stringify(dataObj), 'main_state');
+    };
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('site_labour_payroll_v1');
+    if (raw) {
+      state = { ...state, ...JSON.parse(raw) };
+    }
+    const cfgRaw = localStorage.getItem(SYNC_CFG_KEY);
+    if (cfgRaw) {
+      syncConfig = { ...syncConfig, ...JSON.parse(cfgRaw) };
+    }
+  } catch (e) {}
+
+  if (!state.sites || state.sites.length === 0) {
+    const defaultSiteId = 'site_' + Date.now();
+    state.sites = [{
+      id: defaultSiteId,
+      name: 'Main Project Site A',
+      location: 'Site 01',
+      currency: 'QAR',
+      salaryType: 'daily',
+      defaultRate: 100,
+      defaultOtRate: 15,
+      updatedAt: Date.now()
+    }];
+    state.activeSiteId = defaultSiteId;
+    saveState(false);
+  }
+  if (!state.activeSiteId || !state.sites.find(s => s.id === state.activeSiteId)) {
+    state.activeSiteId = state.sites[0].id;
+  }
+}
+
+function saveState(markDirty = true) {
+  if (markDirty) {
+    state.pendingSyncCount = (state.pendingSyncCount || 0) + 1;
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  mirrorToIndexedDB(state);
+  updateNetworkUI();
+
+  if (markDirty && checkDeviceOnline() && syncConfig.cloudUrl) {
+    debouncedCloudPush();
+  }
+}
+
+let syncTimer = null;
+function debouncedCloudPush() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    pushToCloud(true);
+  }, 1500);
+}
+
+function checkDeviceOnline() {
+  if (window.AndroidBridge && typeof window.AndroidBridge.isOnline === 'function') {
+    return window.AndroidBridge.isOnline();
+  }
+  return navigator.onLine;
+}
+
+function updateNetworkUI() {
+  const online = checkDeviceOnline();
+  const pill = document.getElementById('netStatusPill');
+  const text = document.getElementById('netStatusText');
+  const connEl = document.getElementById('syncConnState');
+  const pendEl = document.getElementById('syncPendingCount');
+  const lastEl = document.getElementById('syncLastTime');
+
+  if (online) {
+    if (syncConfig.cloudUrl && state.pendingSyncCount > 0) {
+      pill.className = 'net-pill net-pending';
+      text.innerText = `Syncing (${state.pendingSyncCount})`;
+    } else {
+      pill.className = 'net-pill net-online';
+      text.innerText = 'Online';
+    }
+    if (connEl) {
+      connEl.innerText = 'Online (Internet Connected)';
+      connEl.style.color = '#16a34a';
+    }
+  } else {
+    pill.className = 'net-pill net-offline';
+    text.innerText = state.pendingSyncCount > 0 ? `Offline (${state.pendingSyncCount} queued)` : 'Offline Mode';
+    if (connEl) {
+      connEl.innerText = 'Offline (Saving Locally on Device)';
+      connEl.style.color = '#d97706';
+    }
+  }
+
+  if (pendEl) pendEl.innerText = state.pendingSyncCount || 0;
+  if (lastEl) lastEl.innerText = syncConfig.lastSynced || 'Never';
+}
+
+function getResolvedCloudEndpoint() {
+  let base = (syncConfig.cloudUrl || '').trim();
+  if (!base) return '';
+  const key = encodeURIComponent((syncConfig.teamKey || 'default-team').trim());
+  if (base.endsWith('.json')) {
+    return base.replace(/\.json$/, `/${key}.json`);
+  }
+  return base.replace(/\/$/, '') + `/${key}.json`;
+}
+
+async function pushToCloud(silent = false) {
+  const endpoint = getResolvedCloudEndpoint();
+  if (!endpoint) {
+    if (!silent) alert('Enter a Cloud Sync URL first, or use Offline Export/Import Backup below.');
+    return;
+  }
+  if (!checkDeviceOnline()) {
+    if (!silent) alert('Device is currently offline. Your data is safely saved on this phone and will sync automatically when online.');
+    return;
+  }
+
+  try {
+    const payload = {
+      sites: state.sites,
+      workers: state.workers,
+      attendance: state.attendance,
+      syncedAt: new Date().toISOString()
+    };
+    const res = await fetch(endpoint, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    state.pendingSyncCount = 0;
+    syncConfig.lastSynced = new Date().toLocaleString();
+    localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(syncConfig));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateNetworkUI();
+    if (!silent) notifyUser('Synced to cloud successfully!');
+  } catch (err) {
+    if (!silent) alert('Cloud sync failed (data remains safe offline): ' + err.message);
+  }
+}
+
+async function pullFromCloud() {
+  const endpoint = getResolvedCloudEndpoint();
+  if (!endpoint) {
+    alert('Please enter your Cloud Sync Endpoint URL first.');
+    return;
+  }
+  if (!checkDeviceOnline()) {
+    alert('You are offline. Connect to internet to pull latest cloud updates.');
+    return;
+  }
+  try {
+    const res = await fetch(endpoint);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const remote = await res.json();
+    if (!remote) {
+      alert('No cloud backup found at this URL yet.');
+      return;
+    }
+    mergeIncomingState(remote);
+    state.pendingSyncCount = 0;
+    syncConfig.lastSynced = new Date().toLocaleString();
+    localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(syncConfig));
+    saveState(false);
+    refreshAll();
+    notifyUser('Cloud data merged successfully!');
+  } catch (err) {
+    alert('Could not pull cloud data: ' + err.message);
+  }
+}
+
+function saveCloudConfigAndSync() {
+  syncConfig.cloudUrl = document.getElementById('cloudSyncUrl').value.trim();
+  syncConfig.teamKey = document.getElementById('cloudSyncKey').value.trim() || 'default-team';
+  localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(syncConfig));
+  pushToCloud(false);
+}
+
+// Smart Timestamp Merge (combines offline supervisor entries with owner data without losing work)
+function mergeIncomingState(incoming) {
+  if (Array.isArray(incoming.sites)) {
+    const siteMap = new Map(state.sites.map(s => [s.id, s]));
+    incoming.sites.forEach(s => {
+      const local = siteMap.get(s.id);
+      if (!local || (s.updatedAt || 0) >= (local.updatedAt || 0)) {
+        siteMap.set(s.id, s);
+      }
+    });
+    state.sites = Array.from(siteMap.values());
+  }
+  if (Array.isArray(incoming.workers)) {
+    const wMap = new Map(state.workers.map(w => [w.uid, w]));
+    incoming.workers.forEach(w => {
+      const local = wMap.get(w.uid);
+      if (!local || (w.updatedAt || 0) >= (local.updatedAt || 0)) {
+        wMap.set(w.uid, w);
+      }
+    });
+    state.workers = Array.from(wMap.values());
+  }
+  if (incoming.attendance && typeof incoming.attendance === 'object') {
+    Object.keys(incoming.attendance).forEach(k => {
+      const remRec = incoming.attendance[k];
+      const locRec = state.attendance[k];
+      if (!locRec || (remRec.updatedAt || 0) >= (locRec.updatedAt || 0)) {
+        state.attendance[k] = remRec;
+      }
+    });
+  }
+}
+
+function exportBackupJson() {
+  const payload = JSON.stringify({
+    app: 'SiteLabourManager',
+    exportedAt: new Date().toISOString(),
+    sites: state.sites,
+    workers: state.workers,
+    attendance: state.attendance
+  }, null, 2);
+  const fileName = `SiteLabour_Backup_${todayStr()}.json`;
+  downloadOrShareBase64(fileName, toBase64Utf8(payload), 'application/json');
+}
+
+function importBackupJson(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      mergeIncomingState(parsed);
+      saveState(true);
+      refreshAll();
+      alert('Backup imported and merged successfully!');
+    } catch (err) {
+      alert('Invalid backup file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function getActiveSite() {
+  return state.sites.find(s => s.id === state.activeSiteId) || state.sites[0];
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function currentMonthStr() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+// ============================================================
+// INITIALIZATION & NAVIGATION
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  const attDateEl = document.getElementById('attDate');
+  const monthEl = document.getElementById('globalMonth');
+  attDateEl.value = todayStr();
+  monthEl.value = currentMonthStr();
+
+  document.getElementById('cloudSyncUrl').value = syncConfig.cloudUrl || '';
+  document.getElementById('cloudSyncKey').value = syncConfig.teamKey || 'default-team';
+
+  attDateEl.addEventListener('change', () => {
+    monthEl.value = attDateEl.value.slice(0, 7);
+    refreshAll();
+  });
+
+  monthEl.addEventListener('change', () => {
+    const m = monthEl.value;
+    if (!attDateEl.value.startsWith(m)) {
+      attDateEl.value = m + '-01';
+    }
+    refreshAll();
+  });
+
+  document.getElementById('siteSelector').addEventListener('change', (e) => {
+    state.activeSiteId = e.target.value;
+    saveState(false);
+    refreshAll();
+  });
+
+  window.addEventListener('online', () => {
+    updateNetworkUI();
+    if (syncConfig.cloudUrl && state.pendingSyncCount > 0) {
+      pushToCloud(true);
+    }
+  });
+  window.addEventListener('offline', updateNetworkUI);
+  setInterval(updateNetworkUI, 5000);
+
+  refreshAll();
+});
+
+function switchTab(tabName, btnEl) {
+  ['attendance', 'workers', 'salary', 'sheet', 'payslip', 'sync'].forEach(t => {
+    document.getElementById('tab-' + t).classList.add('hidden');
+  });
+  document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+
+  refreshAll();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ============================================================
+// SITE MANAGEMENT
+// ============================================================
+function openSiteModal() {
+  editingSiteId = null;
+  document.getElementById('siteModalTitle').innerText = 'Add New Project Site';
+  document.getElementById('mSiteName').value = '';
+  document.getElementById('mSiteLoc').value = '';
+  document.getElementById('mCurrency').value = 'QAR';
+  document.getElementById('mSalaryType').value = 'daily';
+  document.getElementById('mDefaultRate').value = '';
+  document.getElementById('mDefaultOtRate').value = '';
+  document.getElementById('siteModal').classList.add('open');
+}
+
+function openSiteSettingsModal() {
+  const site = getActiveSite();
+  editingSiteId = site.id;
+  document.getElementById('siteModalTitle').innerText = 'Edit Site Salary Settings';
+  document.getElementById('mSiteName').value = site.name;
+  document.getElementById('mSiteLoc').value = site.location || '';
+  document.getElementById('mCurrency').value = site.currency || 'QAR';
+  document.getElementById('mSalaryType').value = site.salaryType || 'daily';
+  document.getElementById('mDefaultRate').value = site.defaultRate;
+  document.getElementById('mDefaultOtRate').value = site.defaultOtRate;
+  document.getElementById('siteModal').classList.add('open');
+}
+
+function saveSite() {
+  const name = document.getElementById('mSiteName').value.trim();
+  const location = document.getElementById('mSiteLoc').value.trim();
+  const currency = document.getElementById('mCurrency').value.trim() || 'QAR';
+  const salaryType = document.getElementById('mSalaryType').value;
+  const defaultRate = parseFloat(document.getElementById('mDefaultRate').value) || 0;
+  const defaultOtRate = parseFloat(document.getElementById('mDefaultOtRate').value) || 0;
+
+  if (!name || defaultRate <= 0) {
+    alert('Please enter Site Name and Default Basic Rate.');
+    return;
+  }
+
+  if (editingSiteId) {
+    const idx = state.sites.findIndex(s => s.id === editingSiteId);
+    if (idx !== -1) {
+      state.sites[idx] = { ...state.sites[idx], name, location, currency, salaryType, defaultRate, defaultOtRate, updatedAt: Date.now() };
+    }
+  } else {
+    const newId = 'site_' + Date.now();
+    state.sites.push({ id: newId, name, location, currency, salaryType, defaultRate, defaultOtRate, updatedAt: Date.now() });
+    state.activeSiteId = newId;
+  }
+
+  saveState(true);
+  closeModal('siteModal');
+  refreshAll();
+}
+
+// ============================================================
+// WORKER REGISTRATION & MANAGEMENT
+// ============================================================
+function registerWorker() {
+  const site = getActiveSite();
+  const workerId = document.getElementById('wId').value.trim();
+  const name = document.getElementById('wName').value.trim();
+  const mobile = document.getElementById('wMobile').value.trim();
+  const role = document.getElementById('wRole').value.trim() || 'General Labour';
+  const customRateRaw = document.getElementById('wCustomRate').value.trim();
+  const otRateRaw = document.getElementById('wOtRate').value.trim();
+
+  if (!workerId || !name || !mobile) {
+    alert('Please enter Worker ID, Name, and Mobile Number.');
+    return;
+  }
+
+  const basicRate = customRateRaw !== '' ? parseFloat(customRateRaw) : site.defaultRate;
+  const otRate = otRateRaw !== '' ? parseFloat(otRateRaw) : site.defaultOtRate;
+
+  state.workers.push({
+    uid: 'w_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+    siteId: site.id,
+    workerId,
+    name,
+    mobile,
+    role,
+    basicRate,
+    otRate,
+    updatedAt: Date.now()
+  });
+
+  document.getElementById('wId').value = '';
+  document.getElementById('wName').value = '';
+  document.getElementById('wMobile').value = '';
+  document.getElementById('wRole').value = '';
+  document.getElementById('wCustomRate').value = '';
+  document.getElementById('wOtRate').value = '';
+
+  saveState(true);
+  refreshAll();
+  notifyUser('Worker saved!');
+}
+
+function openEditWorker(uid) {
+  const w = state.workers.find(x => x.uid === uid);
+  if (!w) return;
+  document.getElementById('ewInternalId').value = w.uid;
+  document.getElementById('ewId').value = w.workerId;
+  document.getElementById('ewMobile').value = w.mobile;
+  document.getElementById('ewName').value = w.name;
+  document.getElementById('ewRole').value = w.role || '';
+  document.getElementById('ewRate').value = w.basicRate;
+  document.getElementById('ewOtRate').value = w.otRate;
+  document.getElementById('editWorkerModal').classList.add('open');
+}
+
+function updateWorker() {
+  const uid = document.getElementById('ewInternalId').value;
+  const idx = state.workers.findIndex(x => x.uid === uid);
+  if (idx === -1) return;
+
+  state.workers[idx].workerId = document.getElementById('ewId').value.trim();
+  state.workers[idx].mobile = document.getElementById('ewMobile').value.trim();
+  state.workers[idx].name = document.getElementById('ewName').value.trim();
+  state.workers[idx].role = document.getElementById('ewRole').value.trim();
+  state.workers[idx].basicRate = parseFloat(document.getElementById('ewRate').value) || 0;
+  state.workers[idx].otRate = parseFloat(document.getElementById('ewOtRate').value) || 0;
+  state.workers[idx].updatedAt = Date.now();
+
+  saveState(true);
+  closeModal('editWorkerModal');
+  refreshAll();
+}
+
+function deleteWorker(uid) {
+  if (!confirm('Delete this worker from this site?')) return;
+  state.workers = state.workers.filter(w => w.uid !== uid);
+  saveState(true);
+  refreshAll();
+}
+
+// ============================================================
+// ATTENDANCE & SUPERVISOR HOURLY OVERTIME
+// ============================================================
+function getAttRecord(siteId, dateStr, uid) {
+  const key = `${siteId}|${dateStr}|${uid}`;
+  return state.attendance[key] || { status: '', otHours: 0 };
+}
+
+function setAttendance(uid, status) {
+  const siteId = state.activeSiteId;
+  const dateStr = document.getElementById('attDate').value;
+  const key = `${siteId}|${dateStr}|${uid}`;
+  const existing = state.attendance[key] || { status: '', otHours: 0 };
+  existing.status = status;
+  if (status === 'A') existing.otHours = 0;
+  existing.updatedAt = Date.now();
+  state.attendance[key] = existing;
+  saveState(true);
+  refreshAll();
+}
+
+function setOvertime(uid, val) {
+  const siteId = state.activeSiteId;
+  const dateStr = document.getElementById('attDate').value;
+  const key = `${siteId}|${dateStr}|${uid}`;
+  const hrs = Math.max(0, parseFloat(val) || 0);
+  const existing = state.attendance[key] || { status: 'P', otHours: 0 };
+  if (hrs > 0 && !existing.status) existing.status = 'P';
+  existing.otHours = hrs;
+  existing.updatedAt = Date.now();
+  state.attendance[key] = existing;
+  saveState(true);
+  updateDashboardKPIs();
+}
+
+function markAllPresent() {
+  const siteId = state.activeSiteId;
+  const dateStr = document.getElementById('attDate').value;
+  const siteWorkers = state.workers.filter(w => w.siteId === siteId);
+  siteWorkers.forEach(w => {
+    const key = `${siteId}|${dateStr}|${w.uid}`;
+    const existing = state.attendance[key] || { status: 'P', otHours: 0 };
+    existing.status = 'P';
+    existing.updatedAt = Date.now();
+    state.attendance[key] = existing;
+  });
+  saveState(true);
+  refreshAll();
+}
+
+// ============================================================
+// SALARY CALCULATION ENGINE
+// ============================================================
+function getDaysInMonth(monthStr) {
+  const [y, m] = monthStr.split('-').map(Number);
+  return new Date(y, m, 0).getDate();
+}
+
+function calculateWorkerMonthPayroll(worker, site, monthStr) {
+  const daysCount = getDaysInMonth(monthStr);
+  let presentDays = 0;
+  let absentDays = 0;
+  let totalOtHours = 0;
+  const dailyMap = {};
+
+  for (let d = 1; d <= daysCount; d++) {
+    const dd = String(d).padStart(2, '0');
+    const dateStr = `${monthStr}-${dd}`;
+    const rec = getAttRecord(site.id, dateStr, worker.uid);
+    dailyMap[d] = rec;
+    if (rec.status === 'P') presentDays++;
+    else if (rec.status === 'A') absentDays++;
+    totalOtHours += (parseFloat(rec.otHours) || 0);
+  }
+
+  let basicPay = 0;
+  if (site.salaryType === 'daily') {
+    basicPay = presentDays * worker.basicRate;
+  } else if (site.salaryType === 'monthly30') {
+    basicPay = (worker.basicRate / 30) * presentDays;
+  } else {
+    basicPay = (worker.basicRate / daysCount) * presentDays;
+  }
+
+  const otPay = totalOtHours * worker.otRate;
+  const netSalary = basicPay + otPay;
+
+  return {
+    presentDays,
+    absentDays,
+    totalOtHours,
+    basicPay: Math.round(basicPay * 100) / 100,
+    otPay: Math.round(otPay * 100) / 100,
+    netSalary: Math.round(netSalary * 100) / 100,
+    dailyMap,
+    daysCount
+  };
+}
+
+// ============================================================
+// RENDERING UI
+// ============================================================
+function refreshAll() {
+  updateNetworkUI();
+  renderSiteSelector();
+  updateDashboardKPIs();
+  renderAttendanceList();
+  renderWorkersList();
+  renderSalaryTable();
+  renderProjectMatrix();
+  populatePayslipSelector();
+  renderSinglePayslip();
+}
+
+function renderSiteSelector() {
+  const sel = document.getElementById('siteSelector');
+  sel.innerHTML = state.sites.map(s =>
+    `<option value="${s.id}" ${s.id === state.activeSiteId ? 'selected' : ''}>📍 ${esc(s.name)} (${esc(s.currency)})</option>`
+  ).join('');
+
+  const site = getActiveSite();
+  const typeLabel = site.salaryType === 'daily' ? 'Daily Wage' : 'Monthly Fixed';
+  document.getElementById('headerSiteInfo').innerText =
+    `${site.name} • ${typeLabel}: ${site.defaultRate} ${site.currency} | OT: ${site.defaultOtRate}/hr`;
+  document.getElementById('regSiteName').innerText = site.name;
+  document.getElementById('wRateLabel').innerText =
+    site.salaryType === 'daily' ? `Daily Rate (Default ${site.defaultRate})` : `Monthly Salary (Default ${site.defaultRate})`;
+}
+
+function updateDashboardKPIs() {
+  const site = getActiveSite();
+  const dateStr = document.getElementById('attDate').value;
+  const monthStr = document.getElementById('globalMonth').value;
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+
+  let present = 0;
+  let absent = 0;
+  siteWorkers.forEach(w => {
+    const rec = getAttRecord(site.id, dateStr, w.uid);
+    if (rec.status === 'P') present++;
+    else if (rec.status === 'A') absent++;
+  });
+
+  let siteTotalSalary = 0;
+  siteWorkers.forEach(w => {
+    siteTotalSalary += calculateWorkerMonthPayroll(w, site, monthStr).netSalary;
+  });
+
+  let allSitesSalary = 0;
+  state.sites.forEach(s => {
+    const sw = state.workers.filter(w => w.siteId === s.id);
+    sw.forEach(w => {
+      allSitesSalary += calculateWorkerMonthPayroll(w, s, monthStr).netSalary;
+    });
+  });
+
+  document.getElementById('kpiPresent').innerText = present;
+  document.getElementById('kpiAbsent').innerText = absent;
+  document.getElementById('kpiDateLabel').innerText = `Date: ${dateStr}`;
+  document.getElementById('kpiTotalWorkers').innerText = `Site Workers: ${siteWorkers.length}`;
+  document.getElementById('kpiSiteSalary').innerText = `${siteTotalSalary.toLocaleString()} ${site.currency}`;
+  document.getElementById('kpiSiteSalarySub').innerText = `${monthStr} (${site.name})`;
+  document.getElementById('kpiAllSitesSalary').innerText = `${allSitesSalary.toLocaleString()}`;
+  document.getElementById('kpiAllSitesCount').innerText = `Across ${state.sites.length} Site(s)`;
+}
+
+function renderAttendanceList() {
+  const site = getActiveSite();
+  const dateStr = document.getElementById('attDate').value;
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  const wrap = document.getElementById('attendanceList');
+
+  if (siteWorkers.length === 0) {
+    wrap.innerHTML = `<div style="text-align:center; padding:24px; color:var(--muted);">
+      No workers registered in <b>${esc(site.name)}</b> yet.<br/>
+      Tap <b>👷 Workers</b> below to register workers.
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = siteWorkers.map(w => {
+    const rec = getAttRecord(site.id, dateStr, w.uid);
+    return `
+      <div class="worker-item">
+        <div class="worker-top">
+          <div>
+            <div class="worker-name">${esc(w.name)} <span class="badge badge-blue">${esc(w.workerId)}</span></div>
+            <div class="worker-meta">📞 ${esc(w.mobile)} • ${esc(w.role)} • OT Rate: <b>${w.otRate} ${site.currency}/hr</b></div>
+          </div>
+        </div>
+        <div class="att-controls">
+          <div class="toggle-group">
+            <button class="att-btn ${rec.status === 'P' ? 'active-p' : ''}" onclick="setAttendance('${w.uid}', 'P')">Present</button>
+            <button class="att-btn ${rec.status === 'A' ? 'active-a' : ''}" onclick="setAttendance('${w.uid}', 'A')">Absent</button>
+          </div>
+          <div class="ot-box">
+            <span>Supervisor OT (Hrs):</span>
+            <input type="number" step="0.5" min="0" class="ot-input" value="${rec.otHours || ''}" placeholder="0"
+              onchange="setOvertime('${w.uid}', this.value)" />
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderWorkersList() {
+  const site = getActiveSite();
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  document.getElementById('workerCountBadge').innerText = siteWorkers.length;
+  const wrap = document.getElementById('workersList');
+
+  if (siteWorkers.length === 0) {
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px;">No workers added to this site yet.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = siteWorkers.map(w => `
+    <div class="worker-item">
+      <div class="worker-top">
+        <div>
+          <div class="worker-name">${esc(w.name)} <span class="badge badge-blue">${esc(w.workerId)}</span></div>
+          <div class="worker-meta">📞 ${esc(w.mobile)} • ${esc(w.role)}</div>
+          <div class="worker-meta" style="margin-top:4px; color:#0f172a;">
+            Basic Rate: <b>${w.basicRate} ${site.currency}</b> | Hourly OT Rate: <b>${w.otRate} ${site.currency}/hr</b>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="openEditWorker('${w.uid}')">Edit</button>
+          <button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;" onclick="deleteWorker('${w.uid}')">Del</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSalaryTable() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  document.getElementById('salMonthLabel').innerText = monthStr;
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  const wrap = document.getElementById('salaryTableWrap');
+
+  if (siteWorkers.length === 0) {
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px;">No workers in this site.</div>`;
+    return;
+  }
+
+  let totalBasic = 0, totalOtPay = 0, totalNet = 0;
+  const rows = siteWorkers.map(w => {
+    const p = calculateWorkerMonthPayroll(w, site, monthStr);
+    totalBasic += p.basicPay;
+    totalOtPay += p.otPay;
+    totalNet += p.netSalary;
+    return `
+      <tr>
+        <td><b>${esc(w.workerId)}</b></td>
+        <td>${esc(w.name)}</td>
+        <td>${esc(w.mobile)}</td>
+        <td>${p.presentDays}</td>
+        <td>${p.absentDays}</td>
+        <td>${w.basicRate}</td>
+        <td>${p.basicPay.toFixed(2)}</td>
+        <td>${p.totalOtHours}h × ${w.otRate}</td>
+        <td>${p.otPay.toFixed(2)}</td>
+        <td><b>${p.netSalary.toFixed(2)}</b></td>
+      </tr>
+    `;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Mobile</th><th>Present</th><th>Absent</th>
+          <th>Rate</th><th>Basic Pay</th><th>OT (Hrs×Rate)</th><th>OT Pay</th><th>Total (${esc(site.currency)})</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+        <tr style="background:#eff6ff; font-weight:800;">
+          <td colspan="6">SITE MONTHLY TOTAL</td>
+          <td>${totalBasic.toFixed(2)}</td>
+          <td>-</td>
+          <td>${totalOtPay.toFixed(2)}</td>
+          <td>${totalNet.toFixed(2)} ${esc(site.currency)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+function renderProjectMatrix() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  const daysCount = getDaysInMonth(monthStr);
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  const wrap = document.getElementById('matrixTableWrap');
+
+  if (siteWorkers.length === 0) {
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px;">No workers in this site.</div>`;
+    return;
+  }
+
+  let dayHeaders = '';
+  for (let d = 1; d <= daysCount; d++) dayHeaders += `<th>${d}</th>`;
+
+  const bodyRows = siteWorkers.map(w => {
+    const p = calculateWorkerMonthPayroll(w, site, monthStr);
+    let cells = '';
+    for (let d = 1; d <= daysCount; d++) {
+      const rec = p.dailyMap[d];
+      let txt = '-';
+      let bg = '';
+      if (rec.status === 'P') {
+        txt = rec.otHours > 0 ? `P+${rec.otHours}` : 'P';
+        bg = 'background:#dcfce7;color:#166534;font-weight:700;';
+      } else if (rec.status === 'A') {
+        txt = 'A';
+        bg = 'background:#fee2e2;color:#991b1b;font-weight:700;';
+      }
+      cells += `<td style="text-align:center;${bg}">${txt}</td>`;
+    }
+    return `
+      <tr>
+        <td><b>${esc(w.workerId)}</b></td>
+        <td>${esc(w.name)}</td>
+        ${cells}
+        <td><b>${p.presentDays}</b></td>
+        <td><b>${p.absentDays}</b></td>
+        <td><b>${p.totalOtHours}</b></td>
+      </tr>
+    `;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Worker Name</th>${dayHeaders}<th>Total P</th><th>Total A</th><th>OT Hrs</th>
+        </tr>
+      </thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  `;
+}
+
+// ============================================================
+// SINGLE PERSON PAYSLIP
+// ============================================================
+function populatePayslipSelector() {
+  const site = getActiveSite();
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  const sel = document.getElementById('payslipWorkerSelect');
+  const prev = sel.value;
+  sel.innerHTML = siteWorkers.map(w =>
+    `<option value="${w.uid}">${esc(w.workerId)} - ${esc(w.name)} (${esc(w.mobile)})</option>`
+  ).join('');
+  if (prev && siteWorkers.find(w => w.uid === prev)) sel.value = prev;
+}
+
+function buildPayslipHTML(worker, site, monthStr) {
+  const p = calculateWorkerMonthPayroll(worker, site, monthStr);
+  return `
+    <div class="payslip-sheet">
+      <div class="ps-header">
+        <div style="font-size:17px;font-weight:800;color:#1e3a8a;">${esc(site.name)}</div>
+        <div style="font-size:12px;color:#475569;">${esc(site.location || 'Project Site')} • MONTHLY WORKER PAYSLIP</div>
+        <div style="font-size:12px;font-weight:700;margin-top:3px;">Salary Month: ${monthStr}</div>
+      </div>
+      <div class="ps-row"><span>Worker ID:</span><b>${esc(worker.workerId)}</b></div>
+      <div class="ps-row"><span>Worker Name:</span><b>${esc(worker.name)}</b></div>
+      <div class="ps-row"><span>Mobile Number:</span><b>${esc(worker.mobile)}</b></div>
+      <div class="ps-row"><span>Trade / Role:</span><b>${esc(worker.role)}</b></div>
+      <div class="ps-row"><span>Total Present Days:</span><b style="color:#16a34a;">${p.presentDays} Days</b></div>
+      <div class="ps-row"><span>Total Absent Days:</span><b style="color:#dc2626;">${p.absentDays} Days</b></div>
+      <div class="ps-row"><span>Basic Rate (${site.salaryType === 'daily' ? 'Per Day' : 'Monthly'}):</span><b>${worker.basicRate} ${esc(site.currency)}</b></div>
+      <div class="ps-row"><span>Basic Salary Earned:</span><b>${p.basicPay.toFixed(2)} ${esc(site.currency)}</b></div>
+      <div class="ps-row"><span>Supervisor Overtime (${p.totalOtHours} hrs × ${worker.otRate}/hr):</span><b>${p.otPay.toFixed(2)} ${esc(site.currency)}</b></div>
+      <div class="ps-total"><span>NET PAYABLE SALARY:</span><span>${p.netSalary.toFixed(2)} ${esc(site.currency)}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:26px;font-size:11px;color:#64748b;">
+        <span>Supervisor Signature</span>
+        <span>Worker Signature</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderSinglePayslip() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  const uid = document.getElementById('payslipWorkerSelect').value;
+  const worker = state.workers.find(w => w.uid === uid);
+  const wrap = document.getElementById('payslipContainer');
+
+  if (!worker) {
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px;">Register a worker first to generate a payslip.</div>`;
+    return;
+  }
+
+  const slipHTML = buildPayslipHTML(worker, site, monthStr);
+  wrap.innerHTML = `
+    ${slipHTML}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+      <button class="btn btn-primary" onclick="printSinglePayslip()">🖨️ Save PDF / Print</button>
+      <button class="btn btn-green" onclick="shareSinglePayslipFile()">📤 Share Payslip</button>
+    </div>
+  `;
+}
+
+function printSinglePayslip() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  const uid = document.getElementById('payslipWorkerSelect').value;
+  const worker = state.workers.find(w => w.uid === uid);
+  if (!worker) return;
+
+  const fullDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    body{font-family:sans-serif;padding:20px;}
+    .payslip-sheet{border:2px solid #1e3a8a;border-radius:10px;padding:18px;max-width:480px;margin:auto;}
+    .ps-header{text-align:center;border-bottom:2px solid #1e3a8a;padding-bottom:10px;margin-bottom:12px;}
+    .ps-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:14px;}
+    .ps-total{display:flex;justify-content:space-between;padding:10px 0;font-size:17px;font-weight:800;color:#1e3a8a;border-top:2px solid #1e3a8a;margin-top:8px;}
+  </style></head><body>${buildPayslipHTML(worker, site, monthStr)}</body></html>`;
+
+  if (window.AndroidBridge && window.AndroidBridge.printPayslip) {
+    window.AndroidBridge.printPayslip(fullDoc, `Payslip_${worker.workerId}_${monthStr}`);
+  } else {
+    window.print();
+  }
+}
+
+function shareSinglePayslipFile() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  const uid = document.getElementById('payslipWorkerSelect').value;
+  const worker = state.workers.find(w => w.uid === uid);
+  if (!worker) return;
+
+  const fullDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    body{font-family:sans-serif;padding:20px;}
+    .payslip-sheet{border:2px solid #1e3a8a;border-radius:10px;padding:18px;max-width:480px;margin:auto;}
+    .ps-header{text-align:center;border-bottom:2px solid #1e3a8a;padding-bottom:10px;margin-bottom:12px;}
+    .ps-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:14px;}
+    .ps-total{display:flex;justify-content:space-between;padding:10px 0;font-size:17px;font-weight:800;color:#1e3a8a;border-top:2px solid #1e3a8a;margin-top:8px;}
+  </style></head><body>${buildPayslipHTML(worker, site, monthStr)}</body></html>`;
+
+  const fileName = `Payslip_${worker.workerId}_${worker.name.replace(/\s+/g,'_')}_${monthStr}.html`;
+  downloadOrShareBase64(fileName, toBase64Utf8(fullDoc), 'text/html');
+}
+
+// ============================================================
+// EXCEL (.XLSX / SPREADSHEETML) EXPORT ENGINE
+// ============================================================
+function buildExcelWorkbookXML(sheets) {
+  let worksheetsXml = '';
+  sheets.forEach(sheet => {
+    let rowsXml = '';
+    sheet.rows.forEach((row, rIdx) => {
+      rowsXml += '<Row>';
+      row.forEach(cell => {
+        const isNum = typeof cell === 'number' && !isNaN(cell);
+        const styleAttr = rIdx === 0 ? ' ss:StyleID="Header"' : '';
+        if (isNum) {
+          rowsXml += `<Cell${styleAttr}><Data ss:Type="Number">${cell}</Data></Cell>`;
+        } else {
+          rowsXml += `<Cell${styleAttr}><Data ss:Type="String">${escXml(String(cell ?? ''))}</Data></Cell>`;
+        }
+      });
+      rowsXml += '</Row>';
+    });
+    const safeName = escXml(sheet.name.slice(0, 30));
+    worksheetsXml += `<Worksheet ss:Name="${safeName}"><Table>${rowsXml}</Table></Worksheet>`;
+  });
+
+  return `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#1E3A8A" ss:Pattern="Solid"/>
+  </Style>
+ </Styles>
+ ${worksheetsXml}
+</Workbook>`;
+}
+
+function buildSiteSalarySheetData(site, monthStr) {
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  const rows = [[
+    'Project Site', 'Month', 'Worker ID', 'Worker Name', 'Mobile', 'Role',
+    'Present Days', 'Absent Days', 'Basic Rate', 'Basic Salary',
+    'OT Hours', 'Hourly OT Rate', 'OT Pay', 'Total Salary', 'Currency'
+  ]];
+  let sumBasic = 0, sumOtHrs = 0, sumOtPay = 0, sumNet = 0;
+  siteWorkers.forEach(w => {
+    const p = calculateWorkerMonthPayroll(w, site, monthStr);
+    sumBasic += p.basicPay;
+    sumOtHrs += p.totalOtHours;
+    sumOtPay += p.otPay;
+    sumNet += p.netSalary;
+    rows.push([
+      site.name, monthStr, w.workerId, w.name, w.mobile, w.role,
+      p.presentDays, p.absentDays, w.basicRate, p.basicPay,
+      p.totalOtHours, w.otRate, p.otPay, p.netSalary, site.currency
+    ]);
+  });
+  rows.push([
+    site.name, monthStr, 'TOTAL', '', '', '',
+    '', '', '', Math.round(sumBasic*100)/100,
+    Math.round(sumOtHrs*100)/100, '', Math.round(sumOtPay*100)/100, Math.round(sumNet*100)/100, site.currency
+  ]);
+  return rows;
+}
+
+function buildSiteAttendanceMatrixSheetData(site, monthStr) {
+  const daysCount = getDaysInMonth(monthStr);
+  const siteWorkers = state.workers.filter(w => w.siteId === site.id);
+  const header = ['Worker ID', 'Worker Name', 'Mobile'];
+  for (let d = 1; d <= daysCount; d++) header.push(`Day ${d}`);
+  header.push('Total Present', 'Total Absent', 'Total OT Hours');
+
+  const rows = [header];
+  siteWorkers.forEach(w => {
+    const p = calculateWorkerMonthPayroll(w, site, monthStr);
+    const r = [w.workerId, w.name, w.mobile];
+    for (let d = 1; d <= daysCount; d++) {
+      const rec = p.dailyMap[d];
+      if (rec.status === 'P') r.push(rec.otHours > 0 ? `P (+${rec.otHours}h)` : 'P');
+      else if (rec.status === 'A') r.push('A');
+      else r.push('-');
+    }
+    r.push(p.presentDays, p.absentDays, p.totalOtHours);
+    rows.push(r);
+  });
+  return rows;
+}
+
+function exportSiteExcel() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  const xml = buildExcelWorkbookXML([
+    { name: 'Monthly Salary', rows: buildSiteSalarySheetData(site, monthStr) },
+    { name: 'Attendance Sheet', rows: buildSiteAttendanceMatrixSheetData(site, monthStr) }
+  ]);
+  const fileName = `${site.name.replace(/\s+/g,'_')}_Salary_${monthStr}.xlsx`;
+  downloadOrShareBase64(fileName, toBase64Utf8(xml), 'application/vnd.ms-excel');
+}
+
+function exportAllSitesExcel() {
+  const monthStr = document.getElementById('globalMonth').value;
+  const sheets = [];
+  state.sites.forEach(s => {
+    sheets.push({ name: `${s.name} Salary`, rows: buildSiteSalarySheetData(s, monthStr) });
+    sheets.push({ name: `${s.name} Att`, rows: buildSiteAttendanceMatrixSheetData(s, monthStr) });
+  });
+  const xml = buildExcelWorkbookXML(sheets);
+  const fileName = `All_Sites_Master_Payroll_${monthStr}.xlsx`;
+  downloadOrShareBase64(fileName, toBase64Utf8(xml), 'application/vnd.ms-excel');
+}
+
+function exportProjectAttendanceSheetExcel() {
+  const site = getActiveSite();
+  const monthStr = document.getElementById('globalMonth').value;
+  const xml = buildExcelWorkbookXML([
+    { name: 'Project Attendance', rows: buildSiteAttendanceMatrixSheetData(site, monthStr) }
+  ]);
+  const fileName = `${site.name.replace(/\s+/g,'_')}_Attendance_${monthStr}.xlsx`;
+  downloadOrShareBase64(fileName, toBase64Utf8(xml), 'application/vnd.ms-excel');
+}
+
+function downloadOrShareBase64(fileName, base64Data, mimeType) {
+  if (window.AndroidBridge && window.AndroidBridge.saveAndShareFile) {
+    window.AndroidBridge.saveAndShareFile(fileName, base64Data, mimeType);
+  } else {
+    const link = document.createElement('a');
+    link.href = `data:${mimeType};base64,${base64Data}`;
+    link.download = fileName;
+    link.click();
+  }
+}
+
+function toBase64Utf8(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function esc(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escXml(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m]));
+}
+
+function notifyUser(msg) {
+  if (window.AndroidBridge && window.AndroidBridge.showToast) {
+    window.AndroidBridge.showToast(msg);
+  }
+}
+</script>
+</body>
+</html>
